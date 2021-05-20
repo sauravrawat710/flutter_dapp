@@ -1,13 +1,11 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dapp/constants.dart';
 import 'package:flutter_dapp/services/api.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-
-import 'package:path_provider/path_provider.dart';
 
 class FetchScreen extends StatefulWidget {
+  static const String routeName = 'fetch/';
   @override
   _FetchScreenState createState() => _FetchScreenState();
 }
@@ -18,7 +16,7 @@ class _FetchScreenState extends State<FetchScreen> {
   File response;
   String labelText = 'Enter Your CID';
   TextEditingController textEditingController;
-  final String baseUrl = 'https://ipfs.infura.io/ipfs/';
+  final String baseUrl = Constants.baseURL;
   String downloadCount;
 
   @override
@@ -35,101 +33,71 @@ class _FetchScreenState extends State<FetchScreen> {
 
   Future<void> getData(String hash) async {
     FocusScope.of(context).unfocus();
-    if (hash.length == 46 || hash.substring(0, 1) == 'Qm') {
-      setState(() {
+    setState(() {
+      if (hash.length == 46 && hash.substring(0, 2) == 'Qm') {
         labelText = 'CID VERSION 0';
-      });
-    } else {
-      setState(() {
+      } else {
         labelText = 'CID VERSION 1';
-      });
-    }
-    setState(() {
+      }
       _clicked = true;
-    });
-  }
-
-  Future<void> downloadFile(String url) async {
-    Dio dio = Dio();
-    try {
-      var dir = await getApplicationDocumentsDirectory();
-      String savePath = '${dir.path}/downloadedFromIPFS.jpg';
-      await dio.download(
-        url,
-        savePath,
-        onReceiveProgress: (count, total) {
-          setState(() {
-            downloadCount = ((count / total) * 100).toStringAsFixed(0) + "%";
-          });
-        },
-      );
-      await ImageGallerySaver.saveFile(savePath);
-    } catch (e) {
-      throw e;
-    }
-    setState(() {
-      downloadCount = 'Completed';
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: textEditingController,
-                  decoration: InputDecoration(
-                    labelText: labelText,
-                    labelStyle: TextStyle(
-                      color: Colors.black,
-                    ),
-                    border: InputBorder.none,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                key: Key(textEditingController.text),
+                controller: textEditingController,
+                decoration: InputDecoration(
+                  labelText: labelText,
+                  labelStyle: TextStyle(
+                    color: Colors.black,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.black),
                   ),
                 ),
               ),
-              ElevatedButton(
-                onPressed: () => getData(textEditingController.text),
-                child: Text('Search'),
+            ),
+            OutlinedButton.icon(
+              icon: Icon(Icons.search),
+              onPressed: () => getData(textEditingController.text),
+              label: Text('Search'),
+            ),
+            const SizedBox(height: 20),
+            if (_clicked)
+              Column(
+                children: [
+                  Text(
+                    'No preview available!',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: () => Api().downloadFile(
+                        textEditingController.text, textEditingController.text),
+                    icon: Icon(Icons.download_outlined),
+                    label: Text('Download'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              if (_clicked)
-                Column(
-                  children: [
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.35,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(
-                            baseUrl + textEditingController.text,
-                          ),
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextButton.icon(
-                      onPressed: () async => await downloadFile(
-                          baseUrl + textEditingController.text),
-                      icon: Icon(Icons.download_outlined),
-                      label: Text('Download'),
-                    ),
-                    if (downloadCount != null)
-                      Text(
-                        'Downloading $downloadCount',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                  ],
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );
