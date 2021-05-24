@@ -27,7 +27,7 @@ class _AddScreenState extends State<AddScreen> {
       _data = File(pickedFile.files.single.path);
     });
     String fileName = pickedFile.files.single.name;
-    String fileExtension = pickedFile.files.first.path.split(".").last;
+    String fileExtension = fileName.split(".").last;
     return futureResponse = api.addData(_data, fileName, fileExtension);
   }
 
@@ -42,7 +42,7 @@ class _AddScreenState extends State<AddScreen> {
       Map args = ModalRoute.of(context).settings.arguments
           as Map<String, FilePickerResult>;
       pickedFile = args['pickedFile'];
-      futureResponse = addFile();
+      addFile();
     });
   }
 

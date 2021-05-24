@@ -6,7 +6,6 @@ import 'package:flutter_dapp/models/add_response_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class Api {
