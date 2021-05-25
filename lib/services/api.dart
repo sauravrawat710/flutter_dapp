@@ -54,9 +54,7 @@ class Api {
       if (Platform.isAndroid) {
         final status = await Permission.storage.request();
         if (status.isGranted) {
-          // var directory = await getExternalStorageDirectory();
           var directory = await DownloadsPathProvider.downloadsDirectory;
-          print(directory);
           bool hasExisted = await directory.exists();
 
           if (!hasExisted) {
@@ -75,9 +73,9 @@ class Api {
         } else {
           return false;
         }
-        //code for ios...
-        return;
       }
+      //code for ios...
+      return;
     } catch (e) {
       print(e);
     }
